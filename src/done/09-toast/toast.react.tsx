@@ -9,6 +9,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import css from "./toast.module.css";
+import "./toast.animations.css";
 
 const TIMER = 3000;
 
@@ -109,6 +110,7 @@ function ToastList({ ref }: { ref: React.Ref<TToastMethods> }) {
 
     return (
         <ul
+            data-test-example="react"
             aria-live="polite"
             aria-relevant="additions removals"
             className={css["toast-list"]}

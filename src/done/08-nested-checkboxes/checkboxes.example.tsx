@@ -1,4 +1,6 @@
 import { CheckboxTree, type TCheckboxItem } from "./checkboxes.react";
+import { CheckboxTree as CheckboxTreeVanilla } from "./checkboxes.vanila";
+import { useEffect, useRef } from "react";
 
 const MOCK_DATA: TCheckboxItem[] = [
     {
@@ -29,3 +31,28 @@ const MOCK_DATA: TCheckboxItem[] = [
 export const CheckboxTreeExample = () => {
     return <CheckboxTree items={MOCK_DATA} />;
 };
+
+export const CheckboxTreeVanillaExample = () => {
+    const rootRef = useRef<HTMLDivElement>(null);
+    const treeRef = useRef<CheckboxTreeVanilla | null>(null);
+
+    useEffect(() => {
+        if (!rootRef.current) return;
+
+        treeRef.current = new CheckboxTreeVanilla({
+            root: rootRef.current,
+            // Cast or ensure type compatibility. The vanilla component expects vanilla TCheckboxItem.
+            // The structure is identical.
+            items: structuredClone(MOCK_DATA) as any
+        });
+
+        treeRef.current.render();
+
+        return () => {
+            treeRef.current?.destroy();
+            treeRef.current = null;
+        }
+    }, [])
+
+    return <div ref={rootRef}></div>
+}

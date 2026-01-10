@@ -1,28 +1,29 @@
 import "./reset.css";
 import css from "./app.module.css";
-import { ToastProvider } from "./done/09-toast/toast.react";
-import { ToastExample } from "./done/09-toast/toast.example";
 
+import { ToastExample, ToastVanillaExample } from "./done/09-toast/toast.example";
+import "./done/09-toast/toast.animations.css"; // Global keyframes
 import { useState } from "react";
 
-import { CheckboxTreeExample } from "./done/08-nested-checkboxes/checkboxes.example";
+import { CheckboxTreeExample, CheckboxTreeVanillaExample } from "./done/08-nested-checkboxes/checkboxes.example";
 import { AccordionExample, AccordionVanillaExample } from "./done/01-accordion/accordion.example";
 import { TabsExample, TabsVanillaExample } from "./done/03-tabs/tabs.example";
 import { TooltipExample, TooltipVanillaExample } from "./done/04-tooltip/tooltip.example";
 import { TableExample, TableVanillaExample } from "./done/05-table/table.example";
-import { Markdown } from "./done/10-markdown/markdown.react";
-import { MarkdownExample } from "./done/10-markdown/markdown.example";
-import { ProgressBarExample } from "./done/12-progress-bar/progress-bar.example";
+import { Markdown } from "./done/14-markdown/markdown.react";
+import { MarkdownExample } from "./done/14-markdown/markdown.example";
+import { ProgressBarExample } from "./done/15-progress-bar/progress-bar.example";
 import { SquareGameExample } from "./done/11-square-game/square-game.example";
-import { UploadComponentExample } from "./done/13-upload-component/upload-component.example";
-import { InfiniteCanvasExample } from "./done/14-infinite-canvas/infinite-canvas.example";
+import { UploadComponentExample } from "./done/16-upload-component/upload-component.example";
+import { InfiniteCanvasExample } from "./done/17-infinite-canvas/infinite-canvas.example";
 import { GalleryExample, GalleryVanillaExample } from "./done/07-gallery/gallery.example";
-import { GPTComponentExample } from "./done/15-gpt-chat/gpt-chat.example";
-import { HeatmapExample } from "./done/16-heatmap/heatmap.example";
-import { HeatmapCanvasExample } from './done/17-heatmap-canvas/heatmap-canvas.example';
+import { GPTComponentExample } from "./done/18-gpt-chat/gpt-chat.example";
+import { HeatmapExample } from "./done/13-heatmap/heatmap.example";
 import { RedditThreadExample, RedditThreadVanillaExample } from "./done/06-reddit-thread/reddit-thread.example";
 import { StarRatingExample, StarRatingVanillaExample } from "./done/02-star-rating/star-rating.example";
-import { VideoPlayerExample } from "./done/18-video-player/video-player.example";
+import { VideoPlayerExample } from "./done/19-video-player/video-player.example";
+import { CalculatorExample, CalculatorVanillaExample } from "./done/10-calculator/calculator.example";
+import { TypeaheadExample, TypeaheadVanillaExample } from "./done/12-typeahead/typeahead.example";
 
 // Import problem markdown files (Bun text imports)
 import toastProblem from "./done/09-toast/problem.md" with { type: 'text' };
@@ -31,18 +32,19 @@ import accordionProblem from "./done/01-accordion/problem.md" with { type: 'text
 import tabsProblem from "./done/03-tabs/problem.md" with { type: 'text' };
 import tooltipProblem from "./done/04-tooltip/problem.md" with { type: 'text' };
 import tableProblem from "./done/05-table/problem.md" with { type: 'text' };
-import markdownProblem from "./done/10-markdown/problem.md" with { type: 'text' };
+import markdownProblem from "./done/14-markdown/problem.md" with { type: 'text' };
 import squareGameProblem from "./done/11-square-game/problem.md" with { type: 'text' };
-import progressBarProblem from "./done/12-progress-bar/problem.md" with { type: 'text' };
-import uploadComponentProblem from "./done/13-upload-component/problem.md" with { type: 'text' };
-import infiniteCanvasProblem from "./done/14-infinite-canvas/problem.md" with { type: 'text' };
+import progressBarProblem from "./done/15-progress-bar/problem.md" with { type: 'text' };
+import uploadComponentProblem from "./done/16-upload-component/problem.md" with { type: 'text' };
+import infiniteCanvasProblem from "./done/17-infinite-canvas/problem.md" with { type: 'text' };
 import galleryProblem from "./done/07-gallery/problem.md" with { type: 'text' };
-import gptChatProblem from "./done/15-gpt-chat/problem.md" with { type: 'text' };
-import heatmapProblem from "./done/16-heatmap/problem.md" with { type: 'text' };
-import heatmapCanvasProblem from "./done/17-heatmap-canvas/problem.md" with { type: 'text' };
+import gptChatProblem from "./done/18-gpt-chat/problem.md" with { type: 'text' };
+import heatmapProblem from "./done/13-heatmap/problem.md" with { type: 'text' };
 import redditThreadProblem from "./done/06-reddit-thread/problem.md" with { type: 'text' };
 import starRatingProblem from "./done/02-star-rating/problem.md" with { type: 'text' };
-import videoPlayerProblem from "./done/18-video-player/problem.md" with { type: 'text' };
+import videoPlayerProblem from "./done/19-video-player/problem.md" with { type: 'text' };
+import calculatorProblem from "./done/10-calculator/problem.md" with { type: 'text' };
+import typeaheadProblem from "./done/12-typeahead/problem.md" with { type: 'text' };
 
 // Helper to create a problem overview component
 const createProblemOverview = (markdownContent: string) => {
@@ -152,6 +154,7 @@ const SECTIONS = {
                 variants: {
                     overview: { component: createProblemOverview(checkboxProblem) },
                     react: { component: CheckboxTreeExample },
+                    vanilla: { component: CheckboxTreeVanillaExample },
                 },
             },
             toast: {
@@ -161,15 +164,17 @@ const SECTIONS = {
                 variants: {
                     overview: { component: createProblemOverview(toastProblem) },
                     react: { component: ToastExample },
+                    vanilla: { component: ToastVanillaExample },
                 },
             },
-            markdown: {
-                id: "markdown",
-                name: "Markdown",
+            calculator: {
+                id: "calculator",
+                name: "Calculator",
                 difficulty: "easy",
                 variants: {
-                    overview: { component: createProblemOverview(markdownProblem) },
-                    react: { component: MarkdownExample },
+                    overview: { component: createProblemOverview(calculatorProblem) },
+                    react: { component: CalculatorExample },
+                    vanilla: { component: CalculatorVanillaExample },
                 },
             },
             squareGame: {
@@ -179,6 +184,34 @@ const SECTIONS = {
                 variants: {
                     overview: { component: createProblemOverview(squareGameProblem) },
                     react: { component: SquareGameExample },
+                },
+            },
+            typeahead: {
+                id: "typeahead",
+                name: "Typeahead",
+                difficulty: "medium",
+                variants: {
+                    overview: { component: createProblemOverview(typeaheadProblem) },
+                    react: { component: TypeaheadExample },
+                    vanilla: { component: TypeaheadVanillaExample },
+                },
+            },
+            heatmap: {
+                id: "heatmap",
+                name: "Heatmap",
+                difficulty: "easy",
+                variants: {
+                    overview: { component: createProblemOverview(heatmapProblem) },
+                    react: { component: HeatmapExample },
+                },
+            },
+            markdown: {
+                id: "markdown",
+                name: "Markdown",
+                difficulty: "easy",
+                variants: {
+                    overview: { component: createProblemOverview(markdownProblem) },
+                    react: { component: MarkdownExample },
                 },
             },
             progressBar: {
@@ -215,24 +248,6 @@ const SECTIONS = {
                 variants: {
                     overview: { component: createProblemOverview(gptChatProblem) },
                     react: { component: GPTComponentExample },
-                },
-            },
-            heatmap: {
-                id: "heatmap",
-                name: "Heatmap",
-                difficulty: "easy",
-                variants: {
-                    overview: { component: createProblemOverview(heatmapProblem) },
-                    react: { component: HeatmapExample },
-                },
-            },
-            heatmapCanvas: {
-                id: "heatmapCanvas",
-                name: "Heatmap Canvas",
-                difficulty: "easy",
-                variants: {
-                    overview: { component: createProblemOverview(heatmapCanvasProblem) },
-                    react: { component: HeatmapCanvasExample },
                 },
             },
             videoPlayer: {
@@ -331,14 +346,9 @@ export default function App() {
                     ))}
                 </div>
                 <div className={css.content}>
-                    <div id="toast-container" className={css.toastContainer}></div>
-                    <ToastProvider target="#toast-container">
-                        <ExampleComponent />
-                    </ToastProvider>
+                    <ExampleComponent />
                 </div>
             </div>
         </div>
     );
 }
-
-
