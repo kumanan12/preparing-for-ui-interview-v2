@@ -1,8 +1,15 @@
-/* ============================================================
-   TableEngine
-============================================================ */
+import {
+  CYCLE,
+  DIV0,
+  ERROR,
+  tokenize,
+  toRpn,
+  type CellId,
+  type Compiled,
+} from '../21.1-google-sheet-parser/parser'
+import { affectedFrom, topoSort } from '../21.2-google-sheet-topo/topo'
 
-import { CYCLE, DIV0, ERROR, tokenize, toRpn, type CellId, type Compiled } from './utility'
+export type { CellId } from '../21.1-google-sheet-parser/parser'
 
 export class TableEngine {
   #raw: Map<CellId, string> = new Map()
@@ -10,8 +17,6 @@ export class TableEngine {
   #deps: Map<CellId, Set<CellId>> = new Map()
   #rev: Map<CellId, Set<CellId>> = new Map()
   #compiled: Map<CellId, Compiled> = new Map()
-
-  /* -------- public API -------- */
 
   setRaw(id: CellId, raw: string): { changed: CellId[] } {
     this.#raw.set(id, raw)
@@ -38,8 +43,6 @@ export class TableEngine {
   getRevDeps(id: CellId): ReadonlySet<CellId> {
     return this.#getRevDeps(id)
   }
-
-  /* -------- graph helpers -------- */
 
   #getDeps(id: CellId): Set<CellId> {
     let s = this.#deps.get(id)
@@ -72,8 +75,6 @@ export class TableEngine {
     this.#deps.set(id, nextDeps)
   }
 
-  /* -------- compile -------- */
-
   #compile(id: CellId, raw: string): Set<CellId> {
     const deps = new Set<CellId>()
     raw = raw.trim()
@@ -104,8 +105,6 @@ export class TableEngine {
     this.#compiled.set(id, { rpn: rpn.rpn })
     return deps
   }
-
-  /* -------- evaluation -------- */
 
   #parseNumericCellValue(id: CellId): { ok: true; n: number } | { ok: false; err: string } {
     const v = (this.#value.get(id) ?? '').trim()
@@ -176,65 +175,13 @@ export class TableEngine {
     return String(result)
   }
 
-  #affectedFrom(start: CellId): Set<CellId> {
-    const affected = new Set<CellId>()
-    const q: CellId[] = [start]
-
-    for (let i = 0; i < q.length; i++) {
-      const id = q[i]!
-      if (affected.has(id)) continue
-      affected.add(id)
-      for (const dep of this.#getRevDeps(id)) q.push(dep)
-    }
-
-    return affected
-  }
-
-  #topo(affected: Set<CellId>): { order: CellId[]; cyclic: Set<CellId> } {
-    const inDegree = new Map<CellId, number>()
-
-    for (const id of affected) {
-      let deg = 0
-      for (const dep of this.#getDeps(id)) {
-        if (affected.has(dep)) deg++
-      }
-      inDegree.set(id, deg)
-    }
-
-    const q: CellId[] = []
-    for (const [id, deg] of inDegree) {
-      if (deg === 0) q.push(id)
-    }
-
-    const order: CellId[] = []
-    for (let i = 0; i < q.length; i++) {
-      const id = q[i]!
-      order.push(id)
-
-      for (const dependent of this.#getRevDeps(id)) {
-        if (!affected.has(dependent)) continue
-        const next = (inDegree.get(dependent) ?? 0) - 1
-        inDegree.set(dependent, next)
-        if (next === 0) q.push(dependent)
-      }
-    }
-
-    const cyclic = new Set<CellId>()
-    if (order.length !== affected.size) {
-      const inOrder = new Set(order)
-      for (const id of affected) {
-        if (!inOrder.has(id)) cyclic.add(id)
-      }
-    }
-
-    return { order, cyclic }
-  }
-
-  /* -------- recompute -------- */
-
   #recomputeFrom(start: CellId): CellId[] {
-    const affected = this.#affectedFrom(start)
-    const { order, cyclic } = this.#topo(affected)
+    const affected = affectedFrom(start, (id) => this.#getRevDeps(id))
+    const { order, cyclic } = topoSort(
+      affected,
+      (id) => this.#getDeps(id),
+      (id) => this.#getRevDeps(id),
+    )
 
     const changed: CellId[] = []
 

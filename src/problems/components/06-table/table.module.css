@@ -5,15 +5,12 @@
 
 .table thead tr {
   background-color: #e0e0e0;
-  /* Light gray */
 }
 
 .table tbody tr {
   background-color: #f5f5f5;
-  /* Slightly gray */
 }
 
 .table tbody tr:nth-child(even) {
   background-color: #ffffff;
-  /* Alternating white for better readability */
 }

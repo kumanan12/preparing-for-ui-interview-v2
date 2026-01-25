@@ -1,56 +1,12 @@
-export const COLS = [
-  'A',
-  'B',
-  'C',
-  'D',
-  'E',
-  'F',
-  'G',
-  'H',
-  'I',
-  'J',
-  'K',
-  'L',
-  'M',
-  'N',
-  'O',
-  'P',
-  'Q',
-  'R',
-  'S',
-  'T',
-  'U',
-  'V',
-  'W',
-  'X',
-  'Y',
-  'Z',
-] as const
-
-export type TTableColumn = (typeof COLS)[number]
-export type CellId = `${TTableColumn}${number}`
-
-export function isCellReference(id: string): id is CellId {
-  return /^[A-Z]\d+$/.test(id)
-}
-
-export function fromCellReference(id: CellId): { row: number; col: string } {
-  const col = id[0] as string
-  const row = Number(id.slice(1))
-  return { row, col }
-}
-
-export function toCellReference(row: number, col: TTableColumn): CellId {
-  return `${col}${row}`
-}
-
 export const ERROR = '#ERROR'
 export const CYCLE = '#CYCLE!'
 export const DIV0 = '#DIV/0!'
 
-/* ============================================================
-   Token types
-============================================================ */
+export type CellId = `${string}${number}`
+
+export function isCellReference(id: string): id is CellId {
+  return /^[A-Z]\d+$/.test(id)
+}
 
 type Op = '+' | '-' | '*' | '/' | 'NEG'
 
@@ -62,10 +18,6 @@ export type Token =
   | { t: 'rp' }
 
 export type Compiled = null | { error: string } | { rpn: Token[] }
-
-/* ============================================================
-   A3 — Tokenizer
-============================================================ */
 
 export function tokenize(
   expr: string,
@@ -166,10 +118,6 @@ export function tokenize(
 
   return { ok: true, tokens }
 }
-
-/* ============================================================
-   A4 — Shunting-yard → RPN
-============================================================ */
 
 export function toRpn(tokens: Token[]): { ok: true; rpn: Token[] } | { ok: false; error: string } {
   const out: Token[] = []

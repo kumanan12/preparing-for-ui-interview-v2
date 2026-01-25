@@ -113,42 +113,45 @@ Low-level DOM manipulation tasks and vanilla JavaScript implementations of commo
 | #   | Problem         | Difficulty | Concepts                                                | Links                                            |
 | --- | --------------- | ---------- | ------------------------------------------------------- | ------------------------------------------------ |
 | 1   | **Detect Type** | 🟢 Easy    | `typeof`, `instanceof`, `Object.prototype.toString`     | [Solution](./src/problems/vanila/01-detect-type) |
-| 2   | **Debounce**    | 🟡 Medium  | Closures, `setTimeout`, Higher-order Functions          | [Solution](./src/problems/vanila/02-debounce)    |
-| 3   | **Throttle**    | 🟡 Medium  | Closures, Time-based Logic, Rate Limiting               | [Solution](./src/problems/vanila/03-throttle)    |
-| 4   | **ES5 Extends** | 🔴 Hard    | Prototypal Inheritance, `prototype` chain, `call/apply` | [Solution](./src/problems/vanila/04-es5-extends) |
+| 2   | **Debounce**    | 🟢 Easy    | Closures, `setTimeout`, Higher-order Functions          | [Solution](./src/problems/vanila/02-debounce)    |
+| 3   | **Throttle**    | 🟢 Easy    | Closures, Time-based Logic, Rate Limiting               | [Solution](./src/problems/vanila/03-throttle)    |
+| 4   | **ES5 Extends** | 🟡 Medium  | Prototypal Inheritance, `prototype` chain, `call/apply` | [Solution](./src/problems/vanila/04-es5-extends) |
 | 5   | **Deep Equals** | 🟡 Medium  | Recursion, Type Checking, Object Traversal              | [Solution](./src/problems/vanila/05-deep-equals) |
 | 6   | **Deep Clone**  | 🟡 Medium  | Recursion, Circular References, `WeakMap`               | [Solution](./src/problems/vanila/06-deep-clone)  |
-| 7   | **Stringify**   | 🔴 Hard    | Recursion, JSON Spec, Edge Cases                        | [Solution](./src/problems/vanila/07-stringify)   |
+| 7   | **Stringify**   | 🟡 Medium  | Recursion, JSON Spec, Edge Cases                        | [Solution](./src/problems/vanila/07-stringify)   |
 | 8   | **Promise**     | 🔴 Hard    | Asynchrony, Microtasks, State Machine                   | [Solution](./src/problems/vanila/08-promise)     |
-| 9   | **Tree Select** | 🟡 Medium  | DOM Traversal, Event Bubbling / Delegation              | [Solution](./src/problems/vanila/09-tree-select) |
+| 9   | **Tree Select** | 🔴 Hard    | DOM Traversal, Event Bubbling / Delegation              | [Solution](./src/problems/vanila/09-tree-select) |
 
 ### 2. React Components
 
 Reusable UI components and widgets implemented in React.
 
-| #   | Component                | Difficulty | Concepts                                        | Links                                                                 |
-| --- | ------------------------ | ---------- | ----------------------------------------------- | --------------------------------------------------------------------- |
-| 1   | **Accordion**            | 🟢 Easy    | State Management, Compound Components           | [Solution](./src/problems/components/01-accordion)                    |
-| 2   | **Star Rating**          | 🟢 Easy    | State, Hover Effects, Array Rendering           | [Solution](./src/problems/components/02-star-rating)                  |
-| 3   | **Tabs**                 | 🟢 Easy    | State, Composition, Accessibility               | [Solution](./src/problems/components/03-tabs)                         |
-| 4   | **Tooltip**              | 🟢 Easy    | Portals, Refs, Coordinate Math                  | [Solution](./src/problems/components/04-tooltip)                      |
-| 5   | **Dialog**               | 🟢 Easy    | HTMLDialogElement, Ref, Portals                 | [Solution](<./src/problems/components/05-dialog(todo)>)               |
-| 6   | **Table**                | 🟡 Medium  | Array Manipulation, Sorting/Filtering           | [Solution](./src/problems/components/06-table)                        |
-| 7   | **Reddit Thread**        | 🟡 Medium  | Recursion, Data Normalization                   | [Solution](./src/problems/components/07-reddit-thread)                |
-| 8   | **Gallery**              | 🟡 Medium  | Image Loading, Modal/Overlay                    | [Solution](./src/problems/components/08-gallery)                      |
-| 9   | **Nested Checkboxes**    | 🔴 Hard    | Recursion, Tree Data, Derived State             | [Solution](./src/problems/components/09-nested-checkboxes)            |
-| 10  | **Toast**                | 🔴 Hard    | React Context, Timers, Portals                  | [Solution](./src/problems/components/10-toast)                        |
-| 11  | **Calculator**           | 🔴 Hard    | String Parsing, State Machine                   | [Solution](./src/problems/components/11-calculator)                   |
-| 12  | **Square Game**          | 🔴 Hard    | Grid Rendering, Game State                      | [Solution](./src/problems/components/12-square-game)                  |
-| 13  | **Typeahead**            | 🔴 Hard    | Debouncing, Async Data, Keyboard Nav            | [Solution](./src/problems/components/13-typeahead)                    |
-| 14  | **Heatmap**              | 🔴 Hard    | Color Scales, Grid Layout, Tooltips             | [Solution](./src/problems/components/14-heatmap)                      |
-| 15  | **Video Player**         | 🔴 Hard    | Media API, Custom Controls, Buffering           | [Solution](./src/problems/components/15-video-player)                 |
-| 16  | **Progress Bar**         | 🔴 Hard    | CSS Transitions, Props Control                  | [Solution](./src/problems/components/16-progress-bar)                 |
-| 17  | **Upload Component**     | 🔴 Hard    | Drag & Drop API, File API                       | [Solution](./src/problems/components/17-upload-component)             |
-| 18  | **Portfolio Visualizer** | 🚀 Extreme | Data Visualization, Charts                      | [Solution](<./src/problems/components/18-portfolio-visualizer(todo)>) |
-| 19  | **Markdown Editor**      | 🚀 Extreme | Text Processing, Regex, Syntax Highlighting     | [Solution](./src/problems/components/19-markdown)                     |
-| 20  | **GPT Chat Interface**   | 🚀 Extreme | Streaming Responses, Auto-scroll                | [Solution](./src/problems/components/20-gpt-chat)                     |
-| 21  | **Infinite Canvas**      | 🚀 Extreme | Canvas API, 2D Transform Matrix, Virtualization | [Solution](./src/problems/components/21-infinite-canvas)              |
+| #    | Component                | Difficulty | Concepts                                        | Links                                                                 |
+| ---- | ------------------------ | ---------- | ----------------------------------------------- | --------------------------------------------------------------------- |
+| 1    | **Accordion**            | 🟢 Easy    | State Management, Compound Components           | [Solution](./src/problems/components/01-accordion)                    |
+| 2    | **Star Rating**          | 🟢 Easy    | State, Hover Effects, Array Rendering           | [Solution](./src/problems/components/02-star-rating)                  |
+| 3    | **Tabs**                 | 🟢 Easy    | State, Composition, Accessibility               | [Solution](./src/problems/components/03-tabs)                         |
+| 4    | **Tooltip**              | 🟢 Easy    | Portals, Refs, Coordinate Math                  | [Solution](./src/problems/components/04-tooltip)                      |
+| 5    | **Dialog**               | 🟢 Easy    | HTMLDialogElement, Ref, Portals                 | [Solution](<./src/problems/components/05-dialog(todo)>)               |
+| 6    | **Table**                | 🟡 Medium  | Array Manipulation, Sorting/Filtering           | [Solution](./src/problems/components/06-table)                        |
+| 7    | **Reddit Thread**        | 🟡 Medium  | Recursion, Data Normalization                   | [Solution](./src/problems/components/07-reddit-thread)                |
+| 8    | **Gallery**              | 🟡 Medium  | Image Loading, Modal/Overlay                    | [Solution](./src/problems/components/08-gallery)                      |
+| 9    | **Nested Checkboxes**    | 🔴 Hard    | Recursion, Tree Data, Derived State             | [Solution](./src/problems/components/09-nested-checkboxes)            |
+| 10   | **Toast**                | 🔴 Hard    | React Context, Timers, Portals                  | [Solution](./src/problems/components/10-toast)                        |
+| 11   | **Calculator**           | 🔴 Hard    | String Parsing, State Machine                   | [Solution](./src/problems/components/11-calculator)                   |
+| 12   | **Square Game**          | 🔴 Hard    | Grid Rendering, Game State                      | [Solution](./src/problems/components/12-square-game)                  |
+| 13   | **Typeahead**            | 🔴 Hard    | Debouncing, Async Data, Keyboard Nav            | [Solution](./src/problems/components/13-typeahead)                    |
+| 14   | **Heatmap**              | 🔴 Hard    | Color Scales, Grid Layout, Tooltips             | [Solution](./src/problems/components/14-heatmap)                      |
+| 15   | **Progress Bar**         | 🔴 Hard    | CSS Transitions, Props Control                  | [Solution](./src/problems/components/15-progress-bar)                 |
+| 16   | **Upload Component**     | 🔴 Hard    | Drag & Drop API, File API                       | [Solution](./src/problems/components/16-upload-component)             |
+| 17   | **Portfolio Visualizer** | 🚀 Extreme | Data Visualization, Charts                      | [Solution](<./src/problems/components/17-portfolio-visualizer(todo)>) |
+| 18   | **Markdown Editor**      | 🚀 Extreme | Text Processing, Regex, Syntax Highlighting     | [Solution](./src/problems/components/18-markdown)                     |
+| 19   | **GPT Chat Interface**   | 🚀 Extreme | Streaming Responses, Auto-scroll                | [Solution](./src/problems/components/19-gpt-chat)                     |
+| 20   | **Infinite Canvas**      | 🚀 Extreme | Canvas API, 2D Transform Matrix, Virtualization | [Solution](./src/problems/components/20-infinite-canvas)              |
+| 21.1 | **Google Sheet Parser**  | 🚀 Extreme | Tokenizer, Shunting-Yard, RPN                   | [Solution](./src/problems/components/21.1-google-sheet-parser)        |
+| 21.2 | **Google Sheet Topo**    | 🚀 Extreme | Topological Sort, Cycle Detection               | [Solution](./src/problems/components/21.2-google-sheet-topo)          |
+| 21.3 | **Google Sheet Engine**  | 🚀 Extreme | Formula Evaluation, Dependency Graph            | [Solution](./src/problems/components/21.3-google-sheet-engine)        |
+| 21.4 | **Google Sheet UX**      | 🚀 Extreme | Virtual Grid, Cell Editing, Formatting          | [Solution](./src/problems/components/21.4-google-sheet-ux)            |
 
 ### 3. TypeScript Challenges
 

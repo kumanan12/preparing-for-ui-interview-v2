@@ -2,7 +2,7 @@ import css from './gpt-chat.module.css'
 import flex from '@course/styles'
 import cx from '@course/cx'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Markdown } from '../19-markdown/markdown.react'
+import { Markdown } from '../18-markdown/markdown.react'
 
 type StreamCallback = (chunk: string) => void
 

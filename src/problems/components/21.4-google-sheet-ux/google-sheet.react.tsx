@@ -2,15 +2,48 @@ import cx from '@course/cx'
 import css from './google-sheet.module.css'
 import { useRef } from 'react'
 import styles from '@course/styles'
-import {
-  COLS,
-  type CellId,
-  type TTableColumn,
-  isCellReference,
-  toCellReference,
-  fromCellReference,
-} from './utility'
-import { TableEngine } from './table-engine'
+import { type CellId, isCellReference } from '../21.1-google-sheet-parser/parser'
+import { TableEngine } from '../21.3-google-sheet-engine/table-engine'
+export const COLS = [
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'F',
+  'G',
+  'H',
+  'I',
+  'J',
+  'K',
+  'L',
+  'M',
+  'N',
+  'O',
+  'P',
+  'Q',
+  'R',
+  'S',
+  'T',
+  'U',
+  'V',
+  'W',
+  'X',
+  'Y',
+  'Z',
+] as const
+
+export type TTableColumn = (typeof COLS)[number]
+
+export function fromCellReference(id: CellId): { row: number; col: string } {
+  const col = id[0] as string
+  const row = Number(id.slice(1))
+  return { row, col }
+}
+
+export function toCellReference(row: number, col: TTableColumn): CellId {
+  return `${col}${row}`
+}
 
 const EMPTY = Symbol(' ')
 const MAX_ROWS = 500

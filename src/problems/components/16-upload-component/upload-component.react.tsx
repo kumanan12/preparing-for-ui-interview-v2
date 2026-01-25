@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { ProgressBar } from '../16-progress-bar/progress-bar.react'
+import { ProgressBar } from '../15-progress-bar/progress-bar.react'
 import css from './upload-component.module.css'
 import flex from '@course/styles'
 import cx from '@course/cx'

@@ -20,17 +20,17 @@ import {
 import { TableExample, TableVanillaExample } from './problems/components/06-table/table.example'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { MarkdownExample } from './problems/components/19-markdown/markdown.example'
+import { MarkdownExample } from './problems/components/18-markdown/markdown.example'
 import {
   ProgressBarExample,
   ProgressBarVanillaExample,
-} from './problems/components/16-progress-bar/progress-bar.example'
+} from './problems/components/15-progress-bar/progress-bar.example'
 import {
   SquareGameExample,
   SquareGameVanillaExample,
 } from './problems/components/12-square-game/square-game.example'
-import { UploadComponentExample } from './problems/components/17-upload-component/upload-component.example'
-import { InfiniteCanvasExample } from './problems/components/21-infinite-canvas/infinite-canvas.example'
+import { UploadComponentExample } from './problems/components/16-upload-component/upload-component.example'
+import { InfiniteCanvasExample } from './problems/components/20-infinite-canvas/infinite-canvas.example'
 import {
   GalleryExample,
   GalleryVanillaExample,
@@ -38,7 +38,7 @@ import {
 import {
   GPTComponentExample,
   GPTChatVanillaExample,
-} from './problems/components/20-gpt-chat/gpt-chat.example'
+} from './problems/components/19-gpt-chat/gpt-chat.example'
 import {
   HeatmapExample,
   HeatmapVanillaExample,
@@ -52,10 +52,6 @@ import {
   StarRatingVanillaExample,
 } from './problems/components/02-star-rating/star-rating.example'
 import {
-  VideoPlayerExample,
-  VideoPlayerVanillaExample,
-} from './problems/components/15-video-player/video-player.example'
-import {
   CalculatorExample,
   CalculatorVanillaExample,
 } from './problems/components/11-calculator/calculator.example'
@@ -67,11 +63,14 @@ import { DialogExample, DialogVanillaExample } from './problems/components/04-di
 import {
   PortfolioVisualizerExample,
   PortfolioVisualizerVanillaExample,
-} from './problems/components/18-portfolio-visualizer/portfolio-visualizer.example'
+} from './problems/components/17-portfolio-visualizer/portfolio-visualizer.example'
 import {
   GoogleSheetExample,
   GoogleSheetVanillaExample,
-} from './problems/components/22-google-sheet/google-sheet.example'
+} from './problems/components/21.4-google-sheet-ux/google-sheet.example'
+import { ParserExample } from './problems/components/21.1-google-sheet-parser/parser.example'
+import { TopoExample } from './problems/components/21.2-google-sheet-topo/topo.example'
+import { TableEngineExample } from './problems/components/21.3-google-sheet-engine/table-engine.example'
 
 // Import problem markdown files (Bun text imports)
 import toastProblem from './problems/components/10-toast/problem.md' with { type: 'text' }
@@ -81,19 +80,21 @@ import tabsProblem from './problems/components/03-tabs/problem.md' with { type: 
 import tooltipProblem from './problems/components/05-tooltip/problem.md' with { type: 'text' }
 import dialogProblem from './problems/components/04-dialog/problem.md' with { type: 'text' }
 import tableProblem from './problems/components/06-table/problem.md' with { type: 'text' }
-import markdownProblem from './problems/components/19-markdown/problem.md' with { type: 'text' }
+import markdownProblem from './problems/components/18-markdown/problem.md' with { type: 'text' }
 import squareGameProblem from './problems/components/12-square-game/problem.md' with { type: 'text' }
-import progressBarProblem from './problems/components/16-progress-bar/problem.md' with { type: 'text' }
-import uploadComponentProblem from './problems/components/17-upload-component/problem.md' with { type: 'text' }
-import portfolioVisualizerProblem from './problems/components/18-portfolio-visualizer/problem.md' with { type: 'text' }
-import googleSheetProblem from './problems/components/22-google-sheet/problem.md' with { type: 'text' }
-import infiniteCanvasProblem from './problems/components/21-infinite-canvas/problem.md' with { type: 'text' }
+import progressBarProblem from './problems/components/15-progress-bar/problem.md' with { type: 'text' }
+import uploadComponentProblem from './problems/components/16-upload-component/problem.md' with { type: 'text' }
+import portfolioVisualizerProblem from './problems/components/17-portfolio-visualizer/problem.md' with { type: 'text' }
+import googleSheetProblem from './problems/components/21.4-google-sheet-ux/problem.md' with { type: 'text' }
+import parserProblem from './problems/components/21.1-google-sheet-parser/problem.md' with { type: 'text' }
+import topoProblem from './problems/components/21.2-google-sheet-topo/problem.md' with { type: 'text' }
+import tableEngineProblem from './problems/components/21.3-google-sheet-engine/problem.md' with { type: 'text' }
+import infiniteCanvasProblem from './problems/components/20-infinite-canvas/problem.md' with { type: 'text' }
 import galleryProblem from './problems/components/08-gallery/problem.md' with { type: 'text' }
-import gptChatProblem from './problems/components/20-gpt-chat/problem.md' with { type: 'text' }
+import gptChatProblem from './problems/components/19-gpt-chat/problem.md' with { type: 'text' }
 import heatmapProblem from './problems/components/14-heatmap/problem.md' with { type: 'text' }
 import redditThreadProblem from './problems/components/07-reddit-thread/problem.md' with { type: 'text' }
 import starRatingProblem from './problems/components/02-star-rating/problem.md' with { type: 'text' }
-import videoPlayerProblem from './problems/components/15-video-player/problem.md' with { type: 'text' }
 import calculatorProblem from './problems/components/11-calculator/problem.md' with { type: 'text' }
 import typeaheadProblem from './problems/components/13-typeahead/problem.md' with { type: 'text' }
 
@@ -268,7 +269,7 @@ const createProblemOverview = (markdownContent: string) => {
 const createTsCode = (code: string) => `\`\`\`typescript\n${code}\n\`\`\``
 
 type TDifficulty = 'warm-up' | 'easy' | 'medium' | 'hard' | 'extreme'
-type TVariantType = 'overview' | 'react' | 'vanilla'
+type TVariantType = 'overview' | 'react' | 'vanilla' | 'example'
 
 type TVariant = {
   component: React.ComponentType
@@ -502,16 +503,6 @@ const SECTIONS = {
           vanilla: { component: HeatmapVanillaExample },
         },
       },
-      videoPlayer: {
-        id: 'videoPlayer',
-        name: 'Video Player',
-        difficulty: 'hard',
-        variants: {
-          overview: { component: createProblemOverview(videoPlayerProblem) },
-          react: { component: VideoPlayerExample },
-          vanilla: { component: VideoPlayerVanillaExample },
-        },
-      },
       progressBar: {
         id: 'progressBar',
         name: 'Progress Bar',
@@ -569,9 +560,36 @@ const SECTIONS = {
           react: { component: InfiniteCanvasExample },
         },
       },
-      googleSheet: {
-        id: 'googleSheet',
-        name: 'Google Sheet',
+      googleSheetParser: {
+        id: '21.1',
+        name: '21.1 Google Sheet Parser',
+        difficulty: 'extreme',
+        variants: {
+          overview: { component: createProblemOverview(parserProblem) },
+          example: { component: ParserExample },
+        },
+      },
+      googleSheetTopo: {
+        id: '21.2',
+        name: '21.2 Google Sheet Topo Sort',
+        difficulty: 'extreme',
+        variants: {
+          overview: { component: createProblemOverview(topoProblem) },
+          example: { component: TopoExample },
+        },
+      },
+      googleSheetEngine: {
+        id: '21.3',
+        name: '21.3 Google Sheet Engine',
+        difficulty: 'extreme',
+        variants: {
+          overview: { component: createProblemOverview(tableEngineProblem) },
+          example: { component: TableEngineExample },
+        },
+      },
+      googleSheetUx: {
+        id: '21.4',
+        name: '21.4 Google Sheet UX',
         difficulty: 'extreme',
         variants: {
           overview: { component: createProblemOverview(googleSheetProblem) },
@@ -1060,7 +1078,9 @@ export default function App() {
                         <li key={problemId} className={css.problemItem}>
                           <div className={css.problemHeader}>
                             <span className={css.problemName}>
-                              {index + 1}. {problem.name}
+                              {/^\d/.test(problem.name)
+                                ? problem.name
+                                : `${index + 1}. ${problem.name}`}
                             </span>
                             <span className={`${css.chip} ${css[problem.difficulty]}`}>
                               {problem.difficulty}
@@ -1079,7 +1099,9 @@ export default function App() {
                                     ? 'Problem Overview'
                                     : variant === 'react'
                                       ? 'React'
-                                      : 'Vanilla'}
+                                      : variant === 'example'
+                                        ? 'Example'
+                                        : 'Vanilla'}
                                 </button>
                               </li>
                             ))}

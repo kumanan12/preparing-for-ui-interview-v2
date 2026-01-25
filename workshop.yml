@@ -1,0 +1,65 @@
+StartDate: 2026-03-18
+EndDate: 2026-03-19
+
+Slug: interviewing-frontend-v2
+Title: Interviewing for Front-End Engineers, v2
+Subtitle: Spend two full days with Evgenii Ray learning the skills and techniques to ace front-end engineering interviews.
+
+Teachers:
+  - ray
+
+Excerpt: Spend two full days with Evgenii Ray learning the skills and techniques to ace front-end engineering interviews.
+
+Benefits:
+  - Solve the most common interview problems
+  - Master common modern web techniques and hacks to efficiently solve any UI interview problems
+  - Learn how to buld components using Vanila TS / JS. Gain confidence with both vanilla JS and React approaches
+  - Learn DOM manipulation and event handling best practices
+  - Solve advanced TypeScript type-level challenges
+  - Understand architectural patterns for complex UIs (spreadsheets, infinite canvas, chats)
+
+Summary: |
+  Interviews are hard! I've passed and failed many in my career, and the best way to prepare is to practice.
+  This intensive two-day workshop prepares you for front-end engineering interviews at top tech companies. 
+  We'll work through progressively challenging problems—from quick warm-ups to complex and challenging tasks, covering 
+  JavaScript fundamentals, React component patterns, DOM APIs, and TypeScript type gymnastics.
+  We solve problems in both vanilla JavaScript and React. Problems are intentionally harder than real 
+  interview questions, so actual interviews feel more manageable.
+
+Audience:
+  Overview: |
+    This workshop is designed for front-end engineers at all levels—from Junior to Staff—who want to 
+    sharpen their interview skills. Whether you're preparing for your first front-end role or targeting 
+    senior/staff positions at top companies, you'll find appropriately challenging material.
+
+  Prerequisites:
+    - Comfortable with TypeScript and modern JavaScript (ES6+)
+    - Basic knowledge of React (components, hooks, state)
+    - Familiarity with DOM APIs and browser fundamentals
+    - An IDE ready to go (VS Code, WebStorm, or similar)
+
+Agenda:
+  Schedule:
+    # Day 1 - Foundations & Components
+    - '0930': 'Day 1 Kick-off: Workshop Overview'
+    - '0945': 'Warm up your keyboard: solving common JavaScript problems'
+    - '1100': 'Break'
+    - '1115': 'ES5 Inheritance and Custom Promise Implementation'
+    - '1230': 'Lunch'
+    - '1330': 'Components (Part 1): Accordion, Star Rating, Tabs, Tooltip, Dialog, Table'
+    - '1500': 'Break'
+    - '1515': 'Components (Part 2): Reddit Thread, Gallery, Nested Checkboxes, Toast'
+    - '1700': 'Day 1 Wrap-up & Q&A'
+
+    # Day 2 - Advanced Challenges & TypeScript
+    - '0930': 'Day 2 Kick-off: Advanced Components'
+    - '0945': 'Components (Part 3): Calculator, Square Game, Typeahead, Heatmap, Progress Bar, Upload Component'
+    - '1100': 'Break'
+    - '1115': 'Components (Part 4): Portfolio Visualizer, Markdown Editor'
+    - '1230': 'Lunch'
+    - '1330': 'Components (Part 5): GPT Chat Interface, Infinite Figma-like Canvas'
+    - '1500': 'Break'
+    - '1515': 'Components (Part 6): Google Sheets (Parser, Topo Sort, Engine, UX)'
+    - '1630': 'TypeScript Type Challenges'
+    - '1730': 'Final Q&A and Interview Tips'
+    - '1800': 'Day 2 Wrap-up & Q&A'
