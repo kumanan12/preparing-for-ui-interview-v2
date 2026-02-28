@@ -177,3 +177,9 @@ function topoSort<T>(
 | topoSort     | O(V + E) | O(V)  |
 
 Where V = nodes, E = edges in the dependency graph.
+
+## Run Tests
+
+```bash
+bun test src/problems/components/21.2-google-sheet-topo/test/topo.test.ts
+```

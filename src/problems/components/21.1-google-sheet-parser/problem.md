@@ -142,3 +142,9 @@ function tokenize(expr: string): { ok: true; tokens: Token[] } | { ok: false; er
 
 function toRpn(tokens: Token[]): { ok: true; rpn: Token[] } | { ok: false; error: string }
 ```
+
+## Run Tests
+
+```bash
+bun test src/problems/components/21.1-google-sheet-parser/test/parser.test.ts
+```

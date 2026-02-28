@@ -182,3 +182,9 @@ This module imports:
 
 - `tokenize`, `toRpn` from **21.1-google-sheet-parser**
 - `affectedFrom`, `topoSort` from **21.2-google-sheet-topo**
+
+## Run Tests
+
+```bash
+bun test src/problems/components/21.3-google-sheet-engine/test/table-engine.test.ts
+```

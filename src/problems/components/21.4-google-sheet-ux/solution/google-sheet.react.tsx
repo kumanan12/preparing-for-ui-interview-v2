@@ -208,27 +208,27 @@ export function GoogleSheet() {
         className={cx(styles.flexRowStart, styles.flexRowGap8, styles.padding12, css.menu)}
       >
         <li>
-          <button data-format="bold" className={css.button}>
+          <button data-format="bold" className={cx(css.button, styles.bNone)}>
             <strong>B</strong>
           </button>
         </li>
         <li>
-          <button data-format="italic" className={css.button}>
+          <button data-format="italic" className={cx(css.button, styles.bNone)}>
             <strong>
               <i>I</i>
             </strong>
           </button>
         </li>
         <li>
-          <button data-format="strikethrough" className={css.button}>
+          <button data-format="strikethrough" className={cx(css.button, styles.bNone)}>
             <strong>
               <s>S</s>
             </strong>
           </button>
         </li>
       </menu>
-      <output className={css.formula}>
-        <input ref={formulaRef} className={css.formula} id="formula" type="text" readOnly />
+      <output className={cx(css.formula, styles.w100)}>
+        <input ref={formulaRef} className={cx(css.formula, styles.w100)} id="formula" type="text" readOnly />
       </output>
       <div
         className={css.container}

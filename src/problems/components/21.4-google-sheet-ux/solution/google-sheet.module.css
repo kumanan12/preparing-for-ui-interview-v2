@@ -36,16 +36,13 @@
   height: 2rem;
   border-radius: 0.5rem;
   background: transparent;
-  border: none;
 }
 
 .button:hover {
   background-color: rgb(223, 223, 223);
 }
 
-.formula {
-  width: 100%;
-}
+.formula {}
 
 .bold {
   font-weight: bold;
