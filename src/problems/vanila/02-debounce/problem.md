@@ -37,3 +37,9 @@ log('c') // Timer resets
 1. Use `setTimeout` to delay execution
 2. Clear previous timeout on each call with `clearTimeout`
 3. Preserve `this` context with `.apply()`
+
+## Run Tests
+
+```bash
+bun test src/problems/vanila/02-debounce/test/debounce.test.ts
+```
