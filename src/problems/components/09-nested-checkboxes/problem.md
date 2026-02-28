@@ -37,7 +37,7 @@ type TCheckboxItem = {
   children?: TCheckboxItem[]
 }
 
-interface CheckboxTreeProps {
+type CheckboxTreeProps = {
   items: TCheckboxItem[]
 }
 ```
