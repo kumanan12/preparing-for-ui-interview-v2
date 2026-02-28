@@ -3,6 +3,12 @@ import styles from './table.module.css'
 import flex from '@course/styles'
 import cx from '@course/cx'
 
+export interface TTableDataSource<T> {
+  pageSize: number
+  pages: number
+  next: (page: number, pageSize: number) => Promise<T[]>
+}
+
 export type TTableColumn<T> = {
   id: string
   name: string
@@ -12,13 +18,9 @@ export type TTableColumn<T> = {
 
 export type TTableProps<T> = {
   columns: TTableColumn<T>[]
-  data: T[]
-  currentPage: number
-  totalPages: number
-  onNext?: () => void
-  onPrev?: () => void
-  onSearch?: (query: string) => void
-  onSort?: (columnId: keyof T, direction: 'asc' | 'desc' | 'none') => void
+  datasource: TTableDataSource<T>
+  search?: (query: string, data: T[]) => T[]
+  comparator?: (columnId: keyof T, direction: 'asc' | 'desc') => (a: T, b: T) => number
 }
 
 export class Table<T extends { id: string }> extends AbstractComponent<TTableProps<T>> {
@@ -27,12 +29,79 @@ export class Table<T extends { id: string }> extends AbstractComponent<TTablePro
   private nextBtn: HTMLButtonElement | null = null
   private pageInfo: HTMLSpanElement | null = null
 
+  private data: T[] = []
+  private currentPage: number = 0
+  private query: string = ''
+  private sort: { columnId: keyof T; direction: 'asc' | 'desc' | 'none' } | null = null
+
   constructor(config: TComponentConfig<TTableProps<T>>) {
     super({
       ...config,
-      className: [styles.table, ...(config.className || [])],
+      className: [cx(flex.w100, flex.flexColumnStart), ...(config.className || [])],
       listeners: ['click', 'input', ...(config.listeners || [])],
     })
+
+    this.initData()
+  }
+
+  private async initData() {
+    if (this.data.length === 0) {
+      const initialData = await this.config.datasource.next(0, this.config.datasource.pageSize)
+      this.data = initialData
+      this.renderState()
+    }
+  }
+
+  private async fetchNext() {
+    if (this.currentPage >= this.config.datasource.pages - 1) return
+    this.currentPage++
+
+    const nextPage = this.currentPage;
+
+    if (this.data.length <= nextPage * this.config.datasource.pageSize && this.data.length < this.config.datasource.pages * this.config.datasource.pageSize) {
+      const newData = await this.config.datasource.next(nextPage, this.config.datasource.pageSize)
+      this.data = [...this.data, ...newData]
+    }
+
+    this.renderState()
+  }
+
+  private fetchPrev() {
+    this.currentPage = Math.max(this.currentPage - 1, 0)
+    this.renderState()
+  }
+
+  private setQuery(q: string) {
+    this.query = q
+    this.currentPage = 0
+    this.renderState()
+  }
+
+  private setSort(columnId: keyof T, direction: 'asc' | 'desc' | 'none') {
+    this.sort = { columnId, direction }
+    this.renderState()
+  }
+
+  private getSlice() {
+    const filterFn = (d: T[]) => {
+      if (!this.query) return d
+      return this.config.search
+        ? this.config.search(this.query, d)
+        : d.filter((item) => Object.values(item).some(v => String(v).toLowerCase().includes(this.query.toLowerCase())))
+    }
+
+    const sortFn = (d: T[]) => {
+      const sortedColumn = this.config.columns.find((c) => c.id === this.sort?.columnId)
+      if (!sortedColumn || !this.sort || !this.config.comparator || this.sort.direction === 'none') return d
+      return [...d].sort(this.config.comparator(sortedColumn.id as keyof T, this.sort.direction))
+    }
+
+    const sliceFn = (d: T[]) => {
+      const { pageSize } = this.config.datasource
+      return d.slice(this.currentPage * pageSize, (this.currentPage + 1) * pageSize)
+    }
+
+    return [filterFn, sortFn, sliceFn].reduce((acc, fn) => fn(acc), this.data)
   }
 
   onClick(event: MouseEvent) {
@@ -41,35 +110,34 @@ export class Table<T extends { id: string }> extends AbstractComponent<TTablePro
     // Handle Sort
     const th = target.closest('th')
     if (th && th.dataset.columnId) {
-      const columnId = th.dataset.columnId
+      const columnId = th.dataset.columnId as keyof T
       const column = this.config.columns.find((c) => c.id === columnId)
-      if (column && this.config.onSort) {
-        const newDirection =
-          column.sort === 'desc' ? 'none' : column.sort === 'asc' ? 'desc' : 'asc'
-        this.config.onSort(columnId as keyof T, newDirection)
+      if (column) {
+        const currentDirection = this.sort?.columnId === columnId ? this.sort.direction : (column.sort ?? 'none')
+        const newDirection = currentDirection === 'desc' ? 'none' : currentDirection === 'asc' ? 'desc' : 'asc'
+        this.setSort(columnId, newDirection)
       }
       return
     }
 
     // Handle Pagination
     if (target.matches('button')) {
-      if (target.textContent === 'Prev' && this.config.onPrev) {
-        this.config.onPrev()
-      } else if (target.textContent === 'Next' && this.config.onNext) {
-        this.config.onNext()
+      if (target.textContent === 'Prev') {
+        this.fetchPrev()
+      } else if (target.textContent === 'Next') {
+        this.fetchNext()
       }
     }
   }
 
   onInput(event: Event) {
     const target = event.target as HTMLInputElement
-    if (target.type === 'search' && this.config.onSearch) {
-      this.config.onSearch(target.value)
+    if (target.type === 'search') {
+      this.setQuery(target.value)
     }
   }
 
-  update(newConfig: Partial<TTableProps<T>>) {
-    this.config = { ...this.config, ...newConfig }
+  private renderState() {
     this.renderRows()
     this.renderPagination()
     this.updateHeaderSortIcons()
@@ -77,18 +145,19 @@ export class Table<T extends { id: string }> extends AbstractComponent<TTablePro
 
   private renderRows() {
     if (!this.tbody) return
-    const { columns, data } = this.config
-    this.tbody.innerHTML = data
+    const { columns } = this.config
+    const slice = this.getSlice()
+    this.tbody.innerHTML = slice
       .map(
         (item) => `
             <tr>
                 ${columns
-                  .map(
-                    (col) => `
+            .map(
+              (col) => `
                     <td class="${cx(flex.padding8)}">${col.renderer(item)}</td>
                 `,
-                  )
-                  .join('')}
+            )
+            .join('')}
             </tr>
         `,
       )
@@ -97,11 +166,11 @@ export class Table<T extends { id: string }> extends AbstractComponent<TTablePro
 
   private renderPagination() {
     if (!this.prevBtn || !this.nextBtn || !this.pageInfo) return
-    const { currentPage, totalPages } = this.config
+    const { pages } = this.config.datasource
 
-    this.prevBtn.disabled = currentPage === 0
-    this.nextBtn.disabled = currentPage === totalPages - 1
-    this.pageInfo.textContent = `${currentPage + 1} / ${totalPages}`
+    this.prevBtn.disabled = this.currentPage === 0
+    this.nextBtn.disabled = this.currentPage === pages - 1
+    this.pageInfo.textContent = `${this.currentPage + 1} / ${pages}`
   }
 
   private updateHeaderSortIcons() {
@@ -111,62 +180,52 @@ export class Table<T extends { id: string }> extends AbstractComponent<TTablePro
       const columnId = th.dataset.columnId
       const column = this.config.columns.find((c) => c.id === columnId)
       if (column) {
-        // Keep the text content but update the arrow
-        // We assumption: Name is text node, arrow is text node.
-        // Simpler: re-render the whole header content
-        th.textContent = `${column.name}${column.sort === 'asc' ? ' ↑' : column.sort === 'desc' ? ' ↓' : ''}`
+        const currentSort = (this.sort && this.sort.columnId === columnId) ? this.sort.direction : column.sort
+        th.textContent = `${column.name}${currentSort === 'asc' ? ' ↑' : currentSort === 'desc' ? ' ↓' : ''}`
       }
     })
   }
 
   afterRender() {
     super.afterRender()
-    this.tbody = this.container!.querySelector('tbody')
-    this.prevBtn = this.container!.querySelector('button:first-of-type')
-    this.nextBtn = this.container!.querySelector('button:last-of-type')
-    this.pageInfo = this.container!.querySelector('span')
+    if (!this.container) return
+    this.tbody = this.container.querySelector('tbody')
+    this.prevBtn = this.container.querySelector('button:first-of-type')
+    this.nextBtn = this.container.querySelector('button:last-of-type')
+    this.pageInfo = this.container.querySelector('span')
+
+    // If data was loaded before afterRender, make sure we render rows immediately.
+    if (this.data.length > 0) {
+      this.renderState()
+    }
   }
 
   toHTML(): string {
-    const { columns, data, currentPage, totalPages } = this.config
+    const { columns, datasource } = this.config
 
     return `
             <table>
                 <thead>
                     <tr>
                         ${columns
-                          .map(
-                            (c) => `
+        .map(
+          (c) => `
                             <th data-column-id="${c.id}" class="${cx(flex.padding8)}" style="cursor: pointer;">
                                 ${c.name}${c.sort === 'asc' ? ' ↑' : c.sort === 'desc' ? ' ↓' : ''}
                             </th>
                         `,
-                          )
-                          .join('')}
+        )
+        .join('')}
                     </tr>
                 </thead>
                 <tbody>
-                    ${data
-                      .map(
-                        (item) => `
-                        <tr>
-                            ${columns
-                              .map(
-                                (col) => `
-                                <td class="${cx(flex.padding8)}">${col.renderer(item)}</td>
-                            `,
-                              )
-                              .join('')}
-                        </tr>
-                    `,
-                      )
-                      .join('')}
+                    <!-- empty initially, filled by renderRows -->
                 </tbody>
             </table>
-            <div class="${cx(flex.flexRowCenter, flex.flexGap8)}">
-                <button ${currentPage === 0 ? 'disabled' : ''} class="${cx(flex.paddingHor8)}">Prev</button>
-                <span>${currentPage + 1} / ${totalPages}</span>
-                <button ${currentPage === totalPages - 1 ? 'disabled' : ''} class="${cx(flex.paddingHor8)}">Next</button>
+            <div class="${cx(flex.flexRowCenter, flex.flexGap8, styles.controls)}">
+                <button disabled class="${cx(flex.paddingHor8)}">Prev</button>
+                <span>1 / ${datasource.pages}</span>
+                <button class="${cx(flex.paddingHor8)}">Next</button>
                 <input type="search" placeholder="Filter" />
             </div>
         `

@@ -1,10 +1,10 @@
-import { useState, useRef, useDeferredValue, useEffect, useMemo, useEffectEvent } from 'react'
-import { Table, type TTableColumn } from './solution/table.react'
+import { useRef, useEffect, useMemo } from 'react'
+import { Table, type TTableColumn, type TTableDataSource } from './solution/table.react'
 import { Table as VanillaTable, type TTableColumn as TVanillaTableColumn } from './solution/table.vanila'
 import { Table as StudentTable } from './table.react'
 import { Table as StudentVanillaTable } from './table.vanila'
 
-import { fetchStocks, type TPaginatedAPIResponse, type Stock } from './solution/api'
+import { fetchStocks, type Stock } from './solution/api'
 
 const COLUMNS: TTableColumn<Stock>[] = [
   { id: 'symbol', name: 'Symbol', renderer: (s) => s.symbol },
@@ -68,98 +68,36 @@ const defaultComparator =
       return 0
     }
 
-function useStockTable<TCol extends { id: string; sort?: 'asc' | 'desc' | 'none' }>(
-  initialColumns: TCol[],
-) {
-  const [columns, setColumns] = useState(initialColumns)
-  const [data, setData] = useState<TPaginatedAPIResponse<Stock>>({
-    data: [],
-    total: 0,
-    page: 0,
-    pageSize: 0,
-    totalPages: 0,
-  })
-  const [page, setPage] = useState(0)
-  const [query, setQuery] = useState('')
-  const defferedQuery = useDeferredValue(query)
-
-  const intervalID = useRef<Timer | undefined>(undefined)
-
-  const fetch = useEffectEvent(() => {
-    fetchStocks(page).then(setData)
-  })
-
-  useEffect(() => {
-    window.clearInterval(intervalID.current)
-    fetch()
-    intervalID.current = setInterval(fetch, 5000)
-    return () => window.clearInterval(intervalID.current)
-  }, [page])
-
-  const setSortedColumn = (columnId: keyof Stock, direction: 'asc' | 'desc' | 'none') => {
-    setColumns((prev) => {
-      return prev.map((c) => {
-        if (c.id === columnId) {
-          return { ...c, sort: direction }
-        }
-        return { ...c, sort: 'none' }
-      })
-    })
-  }
-
-  const rows = data.data
-
-  const filteredData = useMemo(() => {
-    return !defferedQuery
-      ? rows
-      : rows.filter((d) =>
-        Object.values(d).some((v) =>
-          v.toString().toLowerCase().includes(defferedQuery.toLowerCase()),
-        ),
-      )
-  }, [defferedQuery, rows])
-
-  const sortedData = useMemo(() => {
-    const sortedColumn = columns.find((c) => c.sort !== 'none' && c.sort !== undefined)
-    if (!sortedColumn || !sortedColumn.sort || sortedColumn.sort === 'none') return filteredData
-    return [...filteredData].sort(
-      defaultComparator(sortedColumn.id as keyof Stock, sortedColumn.sort),
-    )
-  }, [filteredData, columns])
+const dataSource: () => TTableDataSource<Stock> = () => {
+  const pageSize = 5;
+  const pages = Math.ceil(20 / pageSize);
 
   return {
-    columns,
-    data: sortedData,
-    page,
-    setPage,
-    setQuery,
-    setSortedColumn,
-    totalPages: data.totalPages,
-    query,
+    pages,
+    pageSize,
+    next: async (page: number, size: number) => {
+      if (page >= pages) return []
+      const res = await fetchStocks(page, size)
+      return res.data
+    }
   }
 }
 
 export function TableExample() {
-  const { columns, data, page, setPage, setQuery, setSortedColumn, totalPages } =
-    useStockTable(COLUMNS)
+  const datasource = useMemo(() => dataSource(), []);
 
   return (
     <Table
-      columns={columns}
-      data={data}
-      next={() => setPage((p) => p + 1)}
-      prev={() => setPage((p) => Math.max(0, p - 1))}
-      sort={setSortedColumn}
-      search={setQuery}
-      currentPage={page}
-      totalPages={totalPages}
+      columns={COLUMNS}
+      datasource={datasource}
+      comparator={defaultComparator}
+      search={(query, list) => list.filter(s => Object.values(s).some(v => String(v).toLowerCase().includes(query.toLowerCase())))}
     />
   )
 }
 
 export function TableVanillaExample() {
-  const { columns, data, page, setPage, setQuery, setSortedColumn, totalPages } =
-    useStockTable(VANILLA_COLUMNS)
+  const datasource = useMemo(() => dataSource(), []);
   const rootRef = useRef<HTMLDivElement>(null)
   const tableRef = useRef<VanillaTable<Stock> | null>(null)
 
@@ -167,57 +105,36 @@ export function TableVanillaExample() {
     if (!rootRef.current) return
     tableRef.current = new VanillaTable({
       root: rootRef.current,
-      columns,
-      data,
-      currentPage: page,
-      totalPages,
-      onNext: () => setPage((p) => p + 1),
-      onPrev: () => setPage((p) => Math.max(0, p - 1)),
-      onSearch: (q) => setQuery(q),
-      onSort: (id, dir) => setSortedColumn(id, dir),
+      columns: VANILLA_COLUMNS,
+      datasource,
+      comparator: defaultComparator,
+      search: (query, list) => list.filter(s => Object.values(s).some(v => String(v).toLowerCase().includes(query.toLowerCase())))
     })
     tableRef.current.render()
     return () => {
       tableRef.current?.destroy()
       tableRef.current = null
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [datasource])
 
-  useEffect(() => {
-    if (tableRef.current) {
-      tableRef.current.update({
-        columns,
-        data,
-        currentPage: page,
-        totalPages,
-      })
-    }
-  }, [columns, data, page, totalPages])
-
+  return <div ref={rootRef}></div>
 }
 
 export function TableStudentExample() {
-  const { columns, data, page, setPage, setQuery, setSortedColumn, totalPages } =
-    useStockTable(COLUMNS)
+  const datasource = useMemo(() => dataSource(), []);
 
   return (
     <StudentTable
-      columns={columns}
-      data={data}
-      next={() => setPage((p) => p + 1)}
-      prev={() => setPage((p) => Math.max(0, p - 1))}
-      sort={setSortedColumn}
-      search={setQuery}
-      currentPage={page}
-      totalPages={totalPages}
+      columns={COLUMNS}
+      datasource={datasource}
+      comparator={defaultComparator}
+      search={(query: string, list: Stock[]) => list.filter(s => Object.values(s).some(v => String(v).toLowerCase().includes(query.toLowerCase())))}
     />
   )
 }
 
 export function TableStudentVanillaExample() {
-  const { columns, data, page, setPage, setQuery, setSortedColumn, totalPages } =
-    useStockTable(VANILLA_COLUMNS)
+  const datasource = useMemo(() => dataSource(), []);
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -226,14 +143,10 @@ export function TableStudentVanillaExample() {
     // @ts-ignore - Student might not have implemented type yet
     const table = new StudentVanillaTable({
       root: rootRef.current,
-      columns,
-      data,
-      currentPage: page,
-      totalPages,
-      onNext: () => setPage((p) => p + 1),
-      onPrev: () => setPage((p) => Math.max(0, p - 1)),
-      onSearch: (q) => setQuery(q),
-      onSort: (id, dir) => setSortedColumn(id, dir),
+      columns: VANILLA_COLUMNS,
+      datasource,
+      comparator: defaultComparator,
+      search: (query: string, list: Stock[]) => list.filter(s => Object.values(s).some(v => String(v).toLowerCase().includes(query.toLowerCase())))
     })
 
     if (table.render) table.render()
@@ -241,7 +154,7 @@ export function TableStudentVanillaExample() {
     return () => {
       if (table.destroy) table.destroy()
     }
-  }, []) // Simplification: not updating on props change for student example placeholder
+  }, [datasource])
 
   return <div ref={rootRef}></div>
 }

@@ -29,20 +29,21 @@ The component should accept the following props:
   - `id`: `string` - Unique identifier.
   - `name`: `string` - Header display text.
   - `renderer`: `(item: T) => ReactNode` - Function to render cell content.
-  - `sort`: `'asc' | 'desc' | 'none'` - Current sort state.
-- `data`: `T[]` - Array of data items to display.
-- `currentPage`: `number` - 0-indexed current page number.
-- `totalPages`: `number` - Total number of pages.
-- `next`: `() => void` - Callback for next page.
-- `prev`: `() => void` - Callback for previous page.
-- `sort`: `(columnId: keyof T, direction: SortDirection) => void` - Callback for sorting.
-- `search`: `(query: string) => void` - Callback for search input changes.
+  - `sort`: `'asc' | 'desc' | 'none'` - Initial/default sort state.
+- `datasource`: `TTableDataSource<T>` - Data provider interface.
+  - `pageSize`: `number` - Number of items per page.
+  - `pages`: `number` - Total number of available pages.
+  - `next`: `(page: number, pageSize: number) => Promise<T[]>` - Async function to fetch data for a specific page.
+- `search`: `(query: string, data: T[]) => T[]` - (Optional) Custom search filter function.
+- `comparator`: `(columnId: keyof T, direction: SortDirection) => (a: T, b: T) => number` - (Optional) Custom sort comparator factory.
 
 ## Solution Approach
 
-1.  **State Management**: Use `useState` (or a custom hook) to manage `columns` (for sort state), `page`, and `query`.
-2.  **Data Transformation**:
+1.  **State Management**: Use `useState` to manage internal component state for `data` (accumulated rows), `currentPage`, `query` (search text), and active `sort` column/direction.
+2.  **Stateless Data Fetching**: Use `useEffect` to trigger initial load and a `next()` callback that explicitly passes the required `page` and `pageSize` arguments to the provided `datasource.next` method.
+3.  **Functional Data Pipeline**:
+    - Use a single `useMemo` block that pipes the accumulated `data` through an array of reducer functions (`[filterFn, sortFn, sliceFn].reduce(d => next(d))`).
     - Filter data based on `query`.
     - Sort data based on active column sort state.
-    - Paginate data (slice) based on `page` and `pageSize` (if handling client-side pagination) or pass pre-paginated data.
-3.  **Rendering**: Map over `columns` to render headers and `data` to render rows.
+    - Slice the filtered/sorted data strictly to the boundaries of the `currentPage` and `pageSize`.
+4.  **Rendering**: Map over `columns` to render headers and the resultant `slice` to render rows. Ensure the `search` input resets the `currentPage` to `0` when used.
