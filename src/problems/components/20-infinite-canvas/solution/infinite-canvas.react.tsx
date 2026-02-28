@@ -1,5 +1,7 @@
 import React, { useMemo, useRef, useState, useLayoutEffect } from 'react'
 import css from './infinite-canvas.module.css'
+import flex from '@course/styles'
+import cx from '@course/cx'
 
 const MINIMAP_SIZE = 200
 const WORLD_EXTENT = 5000
@@ -139,7 +141,7 @@ export const InfiniteCanvas = () => {
   const onToolbarPointerDown = (e: React.PointerEvent, type: 'circle' | 'rectangle') => {
     e.preventDefault()
     e.stopPropagation()
-    ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+      ; (e.target as HTMLElement).setPointerCapture(e.pointerId)
     setToolbarDrag({ type, x: e.clientX, y: e.clientY })
   }
 
@@ -150,7 +152,7 @@ export const InfiniteCanvas = () => {
 
   const onToolbarPointerUp = (e: React.PointerEvent) => {
     if (!toolbarDrag) return
-    ;(e.target as HTMLElement).releasePointerCapture(e.pointerId)
+      ; (e.target as HTMLElement).releasePointerCapture(e.pointerId)
 
     // Check if dropped on canvas (not on toolbar)
     const rect = containerRef.current?.getBoundingClientRect()
@@ -328,7 +330,7 @@ export const InfiniteCanvas = () => {
       ref={(el) => {
         containerRef.current = el
       }}
-      className={css.container}
+      className={cx(css.container, flex.wh100)}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -342,7 +344,7 @@ export const InfiniteCanvas = () => {
         } as React.CSSProperties
       }
     >
-      <div className={css.world} style={scale(camera)}>
+      <div className={cx(css.world, flex.wh100, flex.pRel)} style={scale(camera)}>
         {Object.values(worldState.shapes)
           .sort((a, b) => a.order - b.order)
           .map((shape) => {
@@ -384,9 +386,9 @@ export const InfiniteCanvas = () => {
       </div>
 
       {/* Toolbar */}
-      <div className={css.toolbar}>
+      <div className={cx(css.toolbar, flex.pAbs)}>
         <button
-          className={css.toolbarButton}
+          className={cx(css.toolbarButton, flex.flexRowCenter, flex.bgWhite10)}
           onPointerDown={(e) => onToolbarPointerDown(e, 'rectangle')}
           onPointerMove={onToolbarPointerMove}
           onPointerUp={onToolbarPointerUp}
@@ -398,7 +400,7 @@ export const InfiniteCanvas = () => {
           </svg>
         </button>
         <button
-          className={css.toolbarButton}
+          className={cx(css.toolbarButton, flex.flexRowCenter, flex.bgWhite10)}
           onPointerDown={(e) => onToolbarPointerDown(e, 'circle')}
           onPointerMove={onToolbarPointerMove}
           onPointerUp={onToolbarPointerUp}
@@ -426,7 +428,7 @@ export const InfiniteCanvas = () => {
       )}
 
       {/* Minimap */}
-      <div className={css.map}>
+      <div className={cx(css.map, flex.pAbs, flex.bgWhite10)}>
         <div
           style={{
             position: 'absolute',
