@@ -11,6 +11,8 @@ import {
 import { createPortal } from 'react-dom'
 import css from './toast.module.css'
 import './toast.animations.css'
+import flex from '@course/styles'
+import cx from '@course/cx'
 
 const TIMER = 3000
 
@@ -27,7 +29,7 @@ type TToastItem = {
 }
 
 const ToastContext = createContext<TToastMethods>({
-  toast: (_: TToastItem) => {},
+  toast: (_: TToastItem) => { },
 })
 
 /**
@@ -107,7 +109,7 @@ function ToastList({ ref }: { ref: React.Ref<TToastMethods> }) {
       data-test-example="react"
       aria-live="polite"
       aria-relevant="additions removals"
-      className={css['toast-list']}
+      className={cx(css['toast-list'], flex.flexColumnStart)}
       onAnimationEndCapture={onAnimationEnd}
     >
       {items.map((it) => (
@@ -120,7 +122,7 @@ function ToastList({ ref }: { ref: React.Ref<TToastMethods> }) {
           data-id={it.id}
           className={`${it.removed ? css.fadeOut : css.fadeIn}`}
         >
-          <div className={`${css.toast}`}>
+          <div className={cx(css.toast, flex.flexColumnCenter)}>
             <p>{it.text}</p>
           </div>
         </li>

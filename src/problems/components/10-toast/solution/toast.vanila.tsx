@@ -1,6 +1,8 @@
 import { AbstractComponent, type TComponentConfig } from '../../00-abstract-component/component'
 import css from './toast.module.css'
 import './toast.animations.css'
+import flex from '@course/styles'
+import cx from '@course/cx'
 
 export type TToastProps = {}
 
@@ -38,12 +40,12 @@ export class Toast extends AbstractComponent<object> {
   }
 
   toHTML() {
-    return `<ul id="toast-instance-${this.id}" aria-live="polite" aria-relevant="additions removals" class="${css['toast-list']}"></ul>`
+    return `<ul id="toast-instance-${this.id}" aria-live="polite" aria-relevant="additions removals" class="${cx(flex.flexColumnStart, css['toast-list'])}"></ul>`
   }
 
   getToastTemplate(item: TToastItem) {
     return `<li role="status" aria-atomic="true" aria-live="polite" key="${item.id}" data-removed="false" data-id="${item.id}" class="${css.fadeIn}">
-                    <div class="${css.toast}">
+                    <div class="${cx(flex.flexColumnCenter, css.toast)}">
                         <p>${item.text}</p>
                     </div>
                 </li>`

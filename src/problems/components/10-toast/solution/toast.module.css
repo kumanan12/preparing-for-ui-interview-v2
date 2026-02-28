@@ -4,18 +4,12 @@
   height: fit-content;
   max-width: 360px;
   min-height: 48px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
   box-shadow: 0px 0 2px 1px rgba(0, 0, 0, 0.1);
   background: linear-gradient(45deg, #2000e745, #b5113f82);
   border-radius: 1rem;
 }
 
 .toast-list {
-  display: flex;
-  flex-direction: column;
   row-gap: 0.5rem;
   width: 360px;
 }
