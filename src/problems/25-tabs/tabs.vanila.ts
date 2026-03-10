@@ -48,11 +48,11 @@ export class Tabs extends AbstractComponent<TTabsProps> {
      */
     toHTML(): string {
         // TODO: implement
-        return ''
+        return ``;
     }
 
     getTab({name}: TTabProps) {
-        return `<li role="presentation"><button role="tab" id="tab-${name}" data-tab="${name}" aria-controls="tab-panel" aria-selected="false">${name}</button></li>`
+        return ``;
     }
 
     /**

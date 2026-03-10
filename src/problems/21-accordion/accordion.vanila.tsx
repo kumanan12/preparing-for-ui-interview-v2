@@ -29,17 +29,7 @@ type TAccordionProps = {
 }
 
 export class Accordion extends AbstractComponent<TAccordionProps> {
-
     toHTML(): string {
-        const content = this.config.items.map(this.renderItem).join('').trim();
-        return `<div>${content}</div>`
+        return ``
     }
-
-    renderItem(item: TAccordionItem) {
-        return `<details class="${cx(flex.padding16, flex.margin8, flex.bgBlack1, flex.b1, styles.details)}">
-                    <summary class="${cx(styles.summary, flex.flexRowBetween)}">${item.title}</summary>
-                    <p>${item.content}</p>
-                </details>`
-    }
-
 }
