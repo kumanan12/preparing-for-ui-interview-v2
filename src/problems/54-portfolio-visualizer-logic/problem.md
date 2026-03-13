@@ -4,173 +4,125 @@
 
 ## What You'll Learn
 
-- Separating business logic from UI (MVC / headless pattern)
-- Observable state with event emitters
-- Derived computations (percentages, totals)
-- Framework-agnostic engine that works with both React and Vanilla
+- Tree data normalization (nested → flat Map with parent references)
+- Bidirectional value propagation (child updates bubble to parents)
+- Validation constraints on tree nodes
+- Event delegation with `onChange` on a container
+- Immutable state updates with Map
 
 ## Goal
 
-Build the **logic engine** for the Portfolio Visualizer (from 16.1) as a standalone class. The engine manages the tree state, handles value updates with parent bubbling, and emits change events so any UI layer can subscribe.
+Add the **logic layer** to the Portfolio Visualizer from Problem 53. The UI (PortfolioNode component) is already provided. You need to implement: tree normalization, state management, input validation, and parent value bubbling.
 
 ```
-┌─────────────────────────────────────────────┐
-│              PortfolioEngine                 │
-│                                             │
-│  store: Map<id, Node>                       │
-│  rootId: string                             │
-│                                             │
-│  setValue(id, value)                         │
-│    ├─ validate (≥ child sum)                │
-│    ├─ update node                           │
-│    ├─ bubble up parent chain                │
-│    └─ emit('change')                        │
-│                                             │
-│  getPercentage(id) → number                 │
-│  getNode(id) → Node                         │
-│  on('change', callback)                     │
-│  off('change', callback)                    │
-└─────────────────────────────────────────────┘
-         │                    │
-         ▼                    ▼
-   React Component      Vanilla DOM
-   (subscribes via       (subscribes via
-    useEffect)            addEventListener)
+User edits AAPL: $3,000 → $4,000
+
+  Before:                          After:
+  Portfolio: $10,000 (100%)        Portfolio: $11,000 (100%)
+    Stocks:   $6,000 (60%)          Stocks:   $7,000 (63.64%)
+      AAPL:   $3,000 (30%)            AAPL:   $4,000 (36.36%)  ← edited
+      GOOGL:  $2,000 (20%)            GOOGL:  $2,000 (18.18%)
+      MSFT:   $1,000 (10%)            MSFT:   $1,000  (9.09%)
+    Bonds:    $4,000 (40%)          Bonds:    $4,000 (36.36%)
 ```
 
 ## Requirements
 
 ### Core Functionality
 
-1. **Initialize** from a nested tree → normalize into flat `Map<id, Node>`.
-2. **`setValue(id, value)`**: Update a node's value, validate, bubble up, emit change.
-3. **`getPercentage(id)`**: Return `(node.value / root.value) * 100`.
-4. **`getNode(id)`**: Return the node data.
-5. **Event system**: `on(event, cb)` / `off(event, cb)` for subscribing to changes.
+1. **Normalize** the nested tree into a flat `Map<id, node>` with `parentID` references for O(1) lookups.
+2. **State**: `useState<Map>` initialized from the normalized data.
+3. **onChange handler** (event delegation on container):
+   - Read `data-node-id` from the input target
+   - **Validate**: if node has children, reject if new value < sum of children values
+   - Update node value in a new Map
+   - **Bubble up**: walk the parentID chain, recalculating each parent as sum of its children
+4. Percentages update automatically since PortfolioNode reads from the store.
 
-### Validation Rules
+### Normalization
 
-- If node has children: new value must be ≥ sum of children values.
-- If validation fails: reject the update (no state change, no event).
+Convert the nested tree into a flat `Map<id, node>` with `parentID` references:
 
-### Bubble-Up Algorithm
+```ts
+type TPortfolioStateNode = {
+  id: string
+  name: string
+  value: number
+  parentID: string | null
+  children?: TPortfolioStateNode[]
+}
 
-```
-setValue("aapl", 4000)
-  │
-  ▼
-Update "aapl".value = 4000
-  │
-  ▼
-Walk parent chain:
-  "stocks".value = sum(aapl, googl, msft) = 4000 + 2000 + 1000 = 7000
-  "portfolio".value = sum(stocks, bonds) = 7000 + 4000 = 11000
-  │
-  ▼
-emit('change')
+// Map: "aapl" → { id: "aapl", value: 3000, parentID: "stocks", ... }
 ```
 
 ## API Design
 
 ```ts
-class PortfolioEngine {
-  constructor(data: TPortfolioNode)
+type TPortfolioNode = {
+  id: string
+  name: string
+  value: number
+  children?: TPortfolioNode[]
+}
 
-  setValue(id: string, value: number): void
-  getNode(id: string): TPortfolioStateNode
-  getPercentage(id: string): number
-  getRootId(): string
-
-  on(event: 'change', callback: () => void): void
-  off(event: 'change', callback: () => void): void
+type TPortfolioVisualizerProps = {
+  data: TPortfolioNode // root node
 }
 ```
 
 ## Walkthrough
 
-### Step 1 — Normalize in constructor
+### Step 1 — Normalize with `prepare()`
+
+Recursively walk the tree, creating a flat `Map<id, node>` and setting `parentID` on each node. Memoize with `useMemo` on `[data]`. Returns `[rootNode, store Map]`.
+
+### Step 2 — State
+
+`useState<Map>` initialized from the prepare result. Get the root node from the store by its id.
+
+### Step 3 — Handle value changes
+
+Attach a single `onChange` handler on the container div (event delegation). On change:
+
+1. Read `target.dataset.nodeId` and parse the new value
+2. **Validate**: if node has children, ensure new value ≥ sum of children (reject otherwise)
+3. Create a new Map, update the node's value
+4. **Bubble up**: walk the parent chain, recalculating each parent as sum of its children
 
 ```ts
-constructor(data) {
-  this.store = new Map()
-  this.rootId = data.id
-  this.#normalize(data, null)
-}
-
-#normalize(node, parentID) {
-  this.store.set(node.id, { ...node, parentID })
-  node.children?.forEach(child => this.#normalize(child, node.id))
+let current = node
+while (current.parentID) {
+  const parent = newStore.get(current.parentID)
+  const childSum = parent.children.reduce((sum, ch) => sum + newStore.get(ch.id).value, 0)
+  newStore.set(current.parentID, { ...parent, value: childSum })
+  current = parent
 }
 ```
 
-### Step 2 — setValue with validation and bubbling
+### Step 4 — Render
 
-```ts
-setValue(id, value) {
-  const node = this.store.get(id)
-  if (node.children?.length) {
-    const childSum = node.children.reduce((s, c) => s + this.store.get(c.id).value, 0)
-    if (value < childSum) return  // reject
-  }
-  node.value = value
-  this.#bubbleUp(node)
-  this.#emit('change')
-}
-```
-
-### Step 3 — Event emitter
-
-```ts
-#listeners = new Map<string, Set<Function>>()
-
-on(event, cb) {
-  if (!this.#listeners.has(event)) this.#listeners.set(event, new Set())
-  this.#listeners.get(event).add(cb)
-}
-
-off(event, cb) { this.#listeners.get(event)?.delete(cb) }
-
-#emit(event) { this.#listeners.get(event)?.forEach(cb => cb()) }
-```
-
-### Step 4 — Connect to React
-
-```tsx
-const [, forceRender] = useState(0)
-useEffect(() => {
-  const handler = () => forceRender((n) => n + 1)
-  engine.on('change', handler)
-  return () => engine.off('change', handler)
-}, [engine])
-```
+Container div with `onChange={onNodeUpdate}`, render the root PortfolioNode (provided from Problem 53).
 
 <details>
-<summary>💡 Hint — Why separate logic from UI?</summary>
+<summary>💡 Hint — Why a flat Map instead of nested state?</summary>
 
-This pattern (sometimes called "headless" or "logic-only") lets you:
-
-- Test business logic without rendering
-- Reuse the same engine in React, Vanilla, Vue, etc.
-- Keep components thin (just rendering + event wiring)
-
-It's the same pattern used by TanStack Table, Headless UI, and many production libraries.
+With nested state, updating a deeply nested node requires cloning every ancestor. A flat Map gives O(1) access to any node by ID, and the parent chain walk is simple with `parentID` references.
 
 </details>
 
 ## Edge Cases
 
-| Scenario                   | Expected                         |
-| -------------------------- | -------------------------------- |
-| Set leaf value             | Parents recalculate, event emits |
-| Set parent below child sum | Rejected, no event               |
-| Set root value (no parent) | Updates, no bubbling needed      |
-| Multiple rapid updates     | Each triggers change event       |
-| All values = 0             | getPercentage returns 0 (no NaN) |
+| Scenario                           | Expected                                     |
+| ---------------------------------- | -------------------------------------------- |
+| Edit leaf → parents update         | Sum bubbles up to root                       |
+| Edit parent to less than child sum | Rejected (value reverts)                     |
+| Root has no children               | Just a single editable node                  |
+| All values = 0                     | Percentages show 0.00% (no division by zero) |
+| Deeply nested tree                 | All levels render and update correctly       |
 
 ## Verification
 
-1. Create engine with test data.
-2. `setValue("aapl", 4000)` → `getNode("stocks").value === 7000`.
-3. `getPercentage("aapl")` returns correct value.
-4. `on('change', spy)` → spy called after setValue.
-5. Invalid setValue → no change, no event.
+1. Edit a leaf value → parent totals and all percentages update.
+2. Try to set parent below child sum → value rejected.
+3. Percentages always sum to ~100% at each level.
+4. Multiple rapid edits work correctly.

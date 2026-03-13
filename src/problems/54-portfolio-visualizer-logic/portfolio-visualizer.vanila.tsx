@@ -28,16 +28,44 @@ export class PortfolioVisualizer extends AbstractComponent<TPortfolioVisualizerP
   private root: TPortfolioStateNode | null = null
 
   // Step 1: Constructor — super with listeners: ['input'], call prepareData()
-  // Step 2: prepareData + prepare(data, parentID) — recursive, builds store Map + root node
-  // Step 3: renderNode(node, total) — returns HTML string:
-  //   - <details open> with <summary> containing name, <input type=number data-node-id>, <output> percentage
-  //   - Recursively render children
-  // Step 4: toHTML — render container with renderNode(root, root.value)
-  // Step 5: onInput(event) — event delegation on input changes:
-  //   - Read data-node-id, validate (reject if newValue < sum of children)
+
+  // Step 2: prepareData + prepare(data, parentID) — recursive function:
+  //   - Builds flat Map<id, TPortfolioStateNode> with parentID references
+  //   - Sets this.root and this.store
+
+  // Provided: renderNode from Problem 53 (renders the UI)
+  private renderNode(node: TPortfolioStateNode, total: number): string {
+    const percentage = total > 0 ? ((node.value / total) * 100).toFixed(2) : '0.00'
+    const childrenHTML =
+      node.children && node.children.length > 0
+        ? node.children.map((ch) => this.renderNode(ch, total)).join('')
+        : ''
+
+    return `
+      <details class="${cx(styles.paddingLeft16, styles.paddingVer8, css.details)}" open>
+        <summary>
+          <div class="${cx(styles.flexRowBetween, styles.flexRowGap16)}">
+            <strong>${node.name}</strong>
+            <div class="${cx(styles.flexRowGap8)}">
+              <input data-node-id="${node.id}" type="number" value="${node.value}" />
+              <output class="${cx(css.output)}">${percentage}%</output>
+            </div>
+          </div>
+        </summary>
+        ${childrenHTML}
+      </details>
+    `
+  }
+
+  // Step 3: toHTML — render container with renderNode(root, root.value)
+
+  // Step 4: onInput(event) — event delegation on input changes:
+  //   - Read data-node-id from target, parse new value
+  //   - Validation: if node has children, reject if newValue < sum of children values
   //   - Update node value, bubble up parent chain recalculating sums
   //   - Call updateDisplayedValues()
-  // Step 6: updateDisplayedValues — iterate store, update each input value and output percentage in DOM
+
+  // Step 5: updateDisplayedValues — iterate store, update each input value and output percentage in DOM
 
   constructor(config: TComponentConfig<TPortfolioVisualizerProps>) {
     super(config)

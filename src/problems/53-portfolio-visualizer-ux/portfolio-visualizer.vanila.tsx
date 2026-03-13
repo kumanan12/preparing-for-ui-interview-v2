@@ -10,11 +10,6 @@ export type TPortfolioNode = {
   children?: TPortfolioNode[]
 }
 
-type TPortfolioStateNode = Omit<TPortfolioNode, 'children'> & {
-  parentID: string | null
-  children?: TPortfolioStateNode[]
-}
-
 export type TPortfolioVisualizerProps = {
   data: TPortfolioNode
 }
@@ -24,24 +19,20 @@ export type TPortfolioVisualizerProps = {
  */
 
 export class PortfolioVisualizer extends AbstractComponent<TPortfolioVisualizerProps> {
-  private store: Map<string, TPortfolioStateNode> = new Map()
-  private root: TPortfolioStateNode | null = null
-
-  // Step 1: Constructor — super with listeners: ['input'], call prepareData()
-  // Step 2: prepareData + prepare(data, parentID) — recursive, builds store Map + root node
-  // Step 3: renderNode(node, total) — returns HTML string:
-  //   - <details open> with <summary> containing name, <input type=number data-node-id>, <output> percentage
-  //   - Recursively render children
-  // Step 4: toHTML — render container with renderNode(root, root.value)
-  // Step 5: onInput(event) — event delegation on input changes:
-  //   - Read data-node-id, validate (reject if newValue < sum of children)
-  //   - Update node value, bubble up parent chain recalculating sums
-  //   - Call updateDisplayedValues()
-  // Step 6: updateDisplayedValues — iterate store, update each input value and output percentage in DOM
-
   constructor(config: TComponentConfig<TPortfolioVisualizerProps>) {
     super(config)
   }
+
+  // Step 1: renderNode(node, total) — returns HTML string:
+  //   - Calculate percentage: (node.value / total) * 100, formatted to 2 decimal places
+  //   - <details open> with <summary> containing:
+  //     - <strong>name</strong>
+  //     - <input type="number" data-node-id value>
+  //     - <output> showing percentage%
+  //   - Recursively render children with same total
+
+  // Step 2: toHTML — render container div with renderNode(data, data.value)
+
   toHTML() {
     return '<div>TODO: Implement PortfolioVisualizer</div>'
   }
