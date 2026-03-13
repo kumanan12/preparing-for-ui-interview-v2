@@ -1,8 +1,8 @@
-import { useCallback, useDeferredValue, useEffect, useRef, useState } from 'react'
-import { Trie } from './trie'
-import styles from './typeahead.module.css'
+import { useEffect, useRef, useState } from 'react'
+import css from './typeahead.module.css'
 import flex from '@course/styles'
 import cx from '@course/cx'
+import { Trie } from './trie'
 
 export type TTypeaheadEntry<T> = {
   query: string
@@ -17,173 +17,114 @@ type TTypeaheadProps<T> = {
   itemRender: (item: TTypeaheadEntry<T>) => React.ReactNode
 }
 
-const DEFAULT_ITEM_RENDER = (item: TTypeaheadEntry<any>) => item.id
-const DEFAULT_ENTRIES: TTypeaheadEntry<any>[] = []
+/**
+ * Expected usage:
+ * <Typeahead
+ *   onQuery={async (query, signal) => fetch(`/api/search?q=${query}`, { signal }).then(r => r.json())}
+ *   itemRender={(item) => <div>{item.query}</div>}
+ * />
+ */
+const DEFAULT: TTypeaheadEntry<any>[] = []
 
 export function Typeahead<T>({
   id = 'typeahead',
-  entries = DEFAULT_ENTRIES,
+  entries = DEFAULT,
   onQuery,
-  itemRender = DEFAULT_ITEM_RENDER,
+  itemRender,
 }: TTypeaheadProps<T>) {
-  const trieRef = useRef<Trie<TTypeaheadEntry<T>>>(new Trie<TTypeaheadEntry<T>>())
-  const containerRef = useRef<HTMLElement>(null)
+  // Step 1: State — query, items, isLoading, isVisible + trieRef for prefix-based caching
+  const [query, setQuery] = useState<string>('')
+  const [isLoading, setLoading] = useState<boolean>(false)
+  const [isVisible, setIsVisible] = useState<boolean>(false)
+  const trie = useRef<Trie<TTypeaheadEntry<T>>>(new Trie<TTypeaheadEntry<T>>())
 
-  // Step 2: State & Helpers
-  const [items, setItems] = useState<TTypeaheadEntry<T>[]>([])
-  const [query, setQuery] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [isOpen, setIsOpen] = useState(false)
-
-  // useDeferredValue keeps the input extremely responsive.
-  // React will re-render the input immediately, and fetch/filter results in the background.
-  const deferredQuery = useDeferredValue(query)
-
-  const updateTrie = useCallback(
-    (entries: TTypeaheadEntry<T>[]) =>
-      entries.forEach((entry) => {
-        trieRef.current.insert(entry.query, entry)
-      }),
-    [],
-  )
-
-  const getVisibleItems = useCallback(() => {
-    const trie = trieRef.current
-    return trie.getWithPrefix(deferredQuery)
-  }, [deferredQuery])
-
-  const normalizedEntries = entries ?? DEFAULT_ENTRIES
-
-  useEffect(() => {
-    trieRef.current = new Trie<TTypeaheadEntry<T>>()
-    updateTrie(normalizedEntries)
-  }, [normalizedEntries, updateTrie])
-
-  // Step 3 & 4: Async Fetching & Race Conditions
-  useEffect(() => {
-    // Show cached results immediately using the Trie
-    setItems(getVisibleItems())
-    setIsLoading(true)
-
-    // AbortController prevents race conditions (older slower requests overwriting newer fast ones)
-    const controller = new AbortController()
-
-    onQuery(deferredQuery, controller.signal)
-      .then((entries) => {
-        updateTrie(entries)
-        // Read items directly after trie mutation to avoid stale closure
-        setItems(trieRef.current.getWithPrefix(deferredQuery))
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') return
-        console.error(error)
-      })
-      .finally(() => {
-        if (controller.signal.aborted) return
-        setIsLoading(false)
-      })
-
-    return () => {
-      // Abort the previous fetch if deferredQuery changes before it completes
-      controller.abort()
+  // Helper: insert all entries into the trie for prefix search caching
+  function insertAll(entries: TTypeaheadEntry<T>[]) {
+    for (const entry of entries) {
+      trie.current?.insert?.(entry.query, entry)
     }
-  }, [deferredQuery, onQuery, updateTrie, getVisibleItems])
+  }
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
+  // Step 2: Input change handler — update query, show dropdown, fetch results
+  // Note: no AbortController here — component user can debounce onQuery externally
+  const onQueryChange: React.ChangeEventHandler = ({ target }) => {
+    if (target instanceof HTMLInputElement) {
+      const query = target.value
+      setQuery(query)
+      setLoading(true)
+      setIsVisible(true)
+      onQuery(query)
+        .then(insertAll, (error) => {
+          throw error
+        })
+        .finally(() => setLoading(false))
+    }
+  }
+
+  // Step 3: Keyboard handler — Enter/Space to select item, Escape to close
+  // Uses data-item attribute on <li> elements for delegation
+  const onKeyDown: React.KeyboardEventHandler = ({ target, key }) => {
+    if (target instanceof HTMLElement && target.dataset.item) {
+      if (key === 'Enter' || key === ' ') {
+        setQuery(target.dataset.item)
+        setIsVisible(false)
+      } else if (key === 'Escape') {
+        setIsVisible(false)
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  const selectItem = (item: TTypeaheadEntry<T>) => {
-    setQuery(item.query)
-    setItems([])
-    setIsOpen(false)
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value)
-    setIsOpen(true)
-  }
+  // Step 4: Sync external entries into trie when they change
+  useEffect(() => {
+    insertAll(entries)
+  }, [entries])
 
-  const handleInputFocus = () => {
-    setIsOpen(true)
-  }
+  // Step 5: Read visible items from trie using current query as prefix
+  const items = trie.current.getWithPrefix(query)
 
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') {
-      setIsOpen(false)
+  // Step 6: Click handler — event delegation on <ul> instead of per-item onClick
+  // Uses closest('[data-item]') to find the clicked <li> and extract its query value
+  const onListClick: React.MouseEventHandler<HTMLUListElement> = ({ target }) => {
+    const li = (target as HTMLElement).closest<HTMLElement>('[data-item]')
+    if (li?.dataset.item) {
+      setQuery(li.dataset.item)
+      setIsVisible(false)
     }
   }
 
-  const handleItemKeyDown = (e: React.KeyboardEvent<HTMLLIElement>, item: TTypeaheadEntry<T>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      selectItem(item)
-    } else if (e.key === 'Escape') {
-      setIsOpen(false)
-      // Focus back on input when escaping from an item
-      const input = document.getElementById(id)
-      if (input) input.focus()
-    }
-  }
-
-  const showDropdown = isOpen && (items.length > 0 || isLoading)
-
-  // Step 6: Rendering
+  // Step 7: Render — input[role=combobox] + conditional <ul role=listbox>
+  // a11y: aria-expanded, aria-controls, aria-selected, aria-live for screen reader announcements
   return (
-    <section className={styles.container} ref={containerRef}>
-      <div role="status" className={cx(styles.visuallyHidden, flex.pAbs)} aria-live="polite">
-        {items.length} results available.
-      </div>
+    <section className={cx(flex.flexColumnGap8, flex.padding8, flex.b1)} onKeyDown={onKeyDown}>
       <input
-        id={id}
-        role="combobox"
-        aria-label="Search"
         aria-autocomplete="list"
-        aria-expanded={showDropdown}
-        aria-controls={`${id}-listbox`}
-        className={flex.w100}
-        type="text"
+        aria-controls={id}
+        aria-expanded={items.length > 0 && isVisible}
+        aria-label="search"
+        role="combobox"
+        onChange={onQueryChange}
         value={query}
-        onChange={handleInputChange}
-        onFocus={handleInputFocus}
-        onKeyDown={handleInputKeyDown}
+        type="text"
       />
-      {showDropdown && (
-        <ul
-          id={`${id}-listbox`}
-          role="listbox"
-          className={cx(styles.list, flex.bgWhite10, flex.shadow4, flex.padding8, flex.br4)}
-        >
-          {items.map((item) => (
+      {items.length > 0 && isVisible ? (
+        <ul id={id} role="listbox" onClick={onListClick}>
+          {items.map((item: TTypeaheadEntry<T>) => (
             <li
-              tabIndex={0}
+              className={css.item}
+              data-item={item.query}
               role="option"
-              aria-selected={false}
+              aria-selected={item.query === query}
+              tabIndex={0}
               key={item.id}
-              className={cx(styles.item, flex.padding4)}
-              onClick={() => selectItem(item)}
-              onKeyDown={(e) => handleItemKeyDown(e, item)}
             >
               {itemRender(item)}
             </li>
           ))}
-          {isLoading && (
-            <li role="status" className={cx(styles.item, flex.padding4, flex.cBlack4)}>
-              Loading...
-            </li>
-          )}
-          {!isLoading && items.length === 0 && query.length > 0 && (
-            <li className={cx(styles.item, flex.padding4, flex.cBlack4)}>No results found</li>
-          )}
         </ul>
-      )}
+      ) : null}
+      <div role="status" aria-live="polite">
+        {isLoading ? `loading` : `${items.length} results`}
+      </div>
     </section>
   )
 }

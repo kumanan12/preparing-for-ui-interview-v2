@@ -10,9 +10,7 @@ const handleQuery = async (query: string, signal?: AbortSignal) => {
     if (!response.ok) throw new Error('Network response was not ok')
     return await response.json()
   } catch (error: any) {
-    if (error.name === 'AbortError') return []
-    console.error('Fetch error:', error)
-    return []
+    throw error;
   }
 }
 
