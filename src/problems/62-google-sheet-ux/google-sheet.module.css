@@ -1,1 +1,25 @@
 /* Student solution styles */
+.grid {}
+
+.grid__cell {
+    box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.2);
+}
+
+.grid__header {
+    text-align: center;
+    background-color: rgb(250, 250, 250);
+    color: rgb(51, 51, 51);
+    overflow: hidden;
+}
+
+.grid__header.resize-vertical {
+    resize: vertical;
+}
+
+.grid__header.resize-horizontal {
+    resize: horizontal;
+}
+
+.grid__header::-webkit-resizer {
+    display: none;
+}

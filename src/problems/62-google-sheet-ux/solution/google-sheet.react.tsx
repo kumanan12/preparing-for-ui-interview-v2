@@ -1,7 +1,6 @@
 import cx from '@course/cx'
 import css from './google-sheet.module.css'
-import { type CellId } from '../../../../../utils/google-sheet-parser'
-import { TableEngine } from '../../61-google-sheet-recompute/solution/table-engine'
+import {type CellId, TableEngine} from '../../61-google-sheet-recompute/solution/table-engine'
 export const COLS = [
   'A',
   'B',
